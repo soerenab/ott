@@ -97,7 +97,7 @@ def segment_point_cloud(
     # conversion to facilitate computation of default weight below.
     num_per_segment = jnp.array(num_per_segment)
     segment_ids = jnp.arange(num_segments).repeat(
-        num_per_segment, total_repeat_length=num
+        num_per_segment, total_repeat_length=max(num, max_measure_size)
     )
 
   if a is None:
@@ -114,7 +114,9 @@ def segment_point_cloud(
   segmented_a, segmented_x = [], []
 
   for i in range(num_segments):
-    idx = jnp.where(segment_ids == i, jnp.arange(num), num + 1)
+    idx = jnp.where(
+        segment_ids == i, jnp.arange(max(num, max_measure_size)), num + 1
+    )
     idx = jax.lax.dynamic_slice(jnp.sort(idx), (0,), (max_measure_size,))
 
     # segment the weights
